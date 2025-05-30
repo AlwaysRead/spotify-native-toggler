@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { controlPlayback, getCurrentSong } = require('../playbackControl');
+const { controlPlayback, getCurrentSong, setVolume } = require('../playbackControl');
 const { authenticate } = require('../spotifyAuth');
 
 function createWindow() {
@@ -34,4 +34,8 @@ ipcMain.handle('control-playback', async (event, action) => {
 
 ipcMain.handle('get-current-song', async () => {
   return await getCurrentSong();
+});
+
+ipcMain.handle('set-volume', async (event, volume) => {
+  await setVolume(volume);
 });

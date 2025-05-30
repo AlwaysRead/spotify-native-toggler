@@ -10,15 +10,25 @@ async function controlPlayback(action) {
 
   try {
     let endpoint = '';
+    let method = 'put';
+    
     if (action === 'play') endpoint = '/me/player/play';
     else if (action === 'pause') endpoint = '/me/player/pause';
-    else if (action === 'next') endpoint = '/me/player/next';
-    else if (action === 'previous') endpoint = '/me/player/previous';
+    else if (action === 'next') {
+      endpoint = '/me/player/next';
+      method = 'post';
+    }
+    else if (action === 'previous') {
+      endpoint = '/me/player/previous';
+      method = 'post';
+    }
 
-    await axios.put(`https://api.spotify.com/v1${endpoint}`, {}, {
+    await axios({
+      method: method,
+      url: `https://api.spotify.com/v1${endpoint}`,
       headers: {
         Authorization: `Bearer ${accessToken}`,
-      },
+      }
     });
     console.log(`Spotify ${action} command executed.`);
   } catch (error) {
@@ -37,11 +47,25 @@ async function getCurrentSong() {
     return {
       title: res.data.item.name,
       artist: res.data.item.artists.map(a => a.name).join(', '),
-      albumCover: res.data.item.album.images[0]?.url || ''
+      albumCover: res.data.item.album.images[0]?.url || '',
+      isPlaying: res.data.is_playing
     };
   } catch (e) {
     return null;
   }
 }
 
-module.exports = { controlPlayback, getCurrentSong };
+async function setVolume(volume) {
+  const accessToken = getAccessToken();
+  if (!accessToken) return;
+  try {
+    await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=${volume}`, {}, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    console.log(`Volume set to ${volume}%`);
+  } catch (error) {
+    console.error('Volume Control Error:', error.response?.data || error.message);
+  }
+}
+
+module.exports = { controlPlayback, getCurrentSong, setVolume };
