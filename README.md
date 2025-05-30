@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Spotify Toggle App
 
 ## Overview
@@ -47,3 +48,6 @@ This app/plugin allows you to control Spotify playback (play, pause, next, previ
 
 ## License
 MIT
+=======
+# spotify-native-toggler
+>>>>>>> fba9573a814f24c94361a73654da4d09c1226a32
