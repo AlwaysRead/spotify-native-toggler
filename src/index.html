@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Toggle App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .button {
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .volume {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .volume input {
+      width: 150px;
+    }
+    img {
+      border-radius: 10px;
+      width: 150px;
+      height: 150px;
+    }
+  </style>
+</head>
+<body>
+  <div class="song-info">
+    <img id="album-cover" src="" alt="Album Cover">
+    <h2 id="song-title">Song Title</h2>
+    <p id="song-artist">Artist Name</p>
+  </div>
+  <div class="controls">
+    <button class="button" onclick="window.controlPlayback('previous')">⏮️</button>
+    <button class="button" onclick="window.controlPlayback('play')">▶️</button>
+    <button class="button" onclick="window.controlPlayback('pause')">⏸️</button>
+    <button class="button" onclick="window.controlPlayback('next')">⏭️</button>
+  </div>
+  <div class="volume">
+    <label for="volume-slider">Volume: <span id="volume-level">50</span>%</label>
+    <input id="volume-slider" type="range" min="0" max="100" value="50" oninput="adjustVolume(this.value)">
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
