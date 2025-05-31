@@ -32,9 +32,7 @@ This tool provides quick access to Spotify controls via global keyboard shortcut
 
 ## Download
 
-Pre-built binaries for Spotify Native Toggler are available for Windows, macOS, and Linux. Download the latest release from the GitHub Releases page:
-
-- [Download Latest Release](https://github.com/AlwaysRead/spotify-native-toggler/releases)
+Pre-built binaries for Spotify Native Toggler are available for Windows.
 
 **Note:** Ensure you have a Spotify Premium account to use the application, as it is required for API playback control.
 
