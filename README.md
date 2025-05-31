@@ -2,14 +2,6 @@
   
 # Spotify Native Toggler
 
-<img src="path/to/logo.png" alt="Spotify Native Toggler Logo" width="150" height="150">
-
-[![Status](https://img.shields.io/badge/status-in_development-yellow)](https://github.com/AlwaysRead/spotify-native-toggler)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green)](https://nodejs.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub Stars](https://img.shields.io/github/stars/AlwaysRead/spotify-native-toggler?style=social)](https://github.com/AlwaysRead/spotify-native-toggler/stargazers)
-
 **Control your Spotify playback without switching windows**
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Contributing](#contributing) • [License](#license)
