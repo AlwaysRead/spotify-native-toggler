@@ -20,10 +20,10 @@ Windows 11 lacks a universal media controller, making it frustrating to manage m
 
 ## Screenshots
 
-![App Screenshot 1](snapshots/images1.png)
+![App Screenshot 1](snapshots/image1.png)
 *Main interface with playback controls and volume slider*
 
-![App Screenshot 2](snapshots/images2.png)
+![App Screenshot 2](snapshots/image2.png)
 *Interface with album art and song information*
 
 > **Note:** The UI/UX design is currently a work in progress. I'm actively working on improving the app dimensions, padding, and overall layout to create a better user experience. Your feedback and suggestions are welcome!
