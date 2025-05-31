@@ -68,4 +68,18 @@ async function setVolume(volume) {
   }
 }
 
-module.exports = { controlPlayback, getCurrentSong, setVolume };
+async function getCurrentVolume() {
+  const accessToken = getAccessToken();
+  if (!accessToken) return null;
+  try {
+    const response = await axios.get('https://api.spotify.com/v1/me/player', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    return response.data.device.volume_percent;
+  } catch (error) {
+    console.error('Error getting volume:', error.response?.data || error.message);
+    return null;
+  }
+}
+
+module.exports = { controlPlayback, getCurrentSong, setVolume, getCurrentVolume };

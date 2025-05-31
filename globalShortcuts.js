@@ -1,13 +1,30 @@
-const { app, globalShortcut } = require('electron');
+const { globalShortcut } = require('electron');
 const { controlPlayback } = require('./playbackControl');
 
-app.on('ready', () => {
-  globalShortcut.register('CommandOrControl+Shift+P', () => {
+function registerGlobalShortcuts(toggleWindow) {
+  // Show/Hide window
+  globalShortcut.register('CommandOrControl+Shift+Space', () => {
+    toggleWindow();
+  });
+
+  // Play/Pause toggle
+  globalShortcut.register('MediaPlayPause', () => {
     controlPlayback('play');
   });
 
-  globalShortcut.register('CommandOrControl+Shift+O', () => {
-    controlPlayback('pause');
+  // Next track
+  globalShortcut.register('MediaNextTrack', () => {
+    controlPlayback('next');
+  });
+
+  // Previous track
+  globalShortcut.register('MediaPreviousTrack', () => {
+    controlPlayback('previous');
+  });
+
+  // Custom shortcuts (as fallback)
+  globalShortcut.register('CommandOrControl+Shift+P', () => {
+    controlPlayback('play');
   });
 
   globalShortcut.register('CommandOrControl+Shift+N', () => {
@@ -19,8 +36,6 @@ app.on('ready', () => {
   });
 
   console.log('Global shortcuts registered.');
-});
+}
 
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
-});
+module.exports = { registerGlobalShortcuts };
