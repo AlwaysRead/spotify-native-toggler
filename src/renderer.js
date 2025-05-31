@@ -1,8 +1,14 @@
 let isPlaying = false;
 let hideTimeout = null;
 let isHovering = false;
-let previousVolume = 50;
+let currentVolume = 50;
 let isMuted = false;
+let previousVolume = 50;
+let isUpdatingVolume = false;
+let volumeUpdateTimeout = null;
+let lastVolumeUpdate = Date.now();
+let targetVolume = 50;
+let isUserAdjusting = false;
 
 function resetHideTimeout() {
   if (hideTimeout) {
@@ -66,24 +72,34 @@ function togglePlayPause() {
 }
 
 async function getCurrentVolume() {
+  // Skip volume update if user is adjusting or if it's too soon after last update
+  if (isUserAdjusting || isUpdatingVolume || (Date.now() - lastVolumeUpdate < 500)) return;
+    
   try {
-    const response = await window.electronAPI.getCurrentVolume();
-    const volumeSlider = document.getElementById('volume-slider');
-    if (volumeSlider && response !== null) {
-      volumeSlider.value = response;
-      previousVolume = response;
-      updateMuteState(response === 0);
+    const volume = await window.electronAPI.getCurrentVolume();
+    if (volume !== null && volume !== 0) { // Don't update if volume is 0
+      targetVolume = volume;
+      currentVolume = volume;
+      updateVolumeUI();
     }
   } catch (error) {
     console.error('Error fetching volume:', error);
   }
 }
 
-function updateMuteState(muted) {
-  isMuted = muted;
+function updateVolumeUI() {
+  const volumeSlider = document.getElementById('volume-slider');
   const volumeContainer = document.querySelector('.volume');
+  
+  if (volumeSlider) {
+    // Only update slider if it's not being adjusted by user
+    if (!isUserAdjusting) {
+      volumeSlider.value = currentVolume;
+    }
+  }
+  
   if (volumeContainer) {
-    if (muted) {
+    if (currentVolume === 0) {
       volumeContainer.classList.add('muted');
     } else {
       volumeContainer.classList.remove('muted');
@@ -91,35 +107,56 @@ function updateMuteState(muted) {
   }
 }
 
-function adjustVolume(volume) {
+async function adjustVolume(volume) {
   const newVolume = parseInt(volume);
-  window.electronAPI.setVolume(newVolume);
+  if (isNaN(newVolume) || newVolume < 0 || newVolume > 100) return;
   
-  if (newVolume > 0) {
-    previousVolume = newVolume;
-    updateMuteState(false);
-  } else {
-    updateMuteState(true);
+  // Don't allow setting volume to 0 unless explicitly muted
+  if (newVolume === 0 && !isMuted) return;
+  
+  // Clear any pending volume updates
+  if (volumeUpdateTimeout) {
+    clearTimeout(volumeUpdateTimeout);
   }
+  
+  // Update UI immediately for responsiveness
+  targetVolume = newVolume;
+  currentVolume = newVolume;
+  updateVolumeUI();
+  
+  // Debounce the actual volume update
+  volumeUpdateTimeout = setTimeout(async () => {
+    isUpdatingVolume = true;
+    try {
+      const result = await window.electronAPI.setVolume(newVolume);
+      if (result !== null) {
+        currentVolume = result;
+        targetVolume = result;
+        if (currentVolume > 0) {
+          previousVolume = currentVolume;
+          isMuted = false;
+        } else {
+          isMuted = true;
+        }
+        updateVolumeUI();
+        lastVolumeUpdate = Date.now();
+      }
+    } finally {
+      isUpdatingVolume = false;
+    }
+  }, 100); // Wait 100ms before actually setting the volume
   
   resetHideTimeout();
 }
 
-function toggleMute() {
-  const volumeSlider = document.getElementById('volume-slider');
-  const volumeContainer = document.querySelector('.volume');
-  
+async function toggleMute() {
   if (isMuted) {
     // Unmute
-    volumeSlider.value = previousVolume;
-    window.electronAPI.setVolume(previousVolume);
-    updateMuteState(false);
+    await adjustVolume(previousVolume);
   } else {
     // Mute
-    previousVolume = parseInt(volumeSlider.value);
-    volumeSlider.value = 0;
-    window.electronAPI.setVolume(0);
-    updateMuteState(true);
+    previousVolume = currentVolume;
+    await adjustVolume(0);
   }
   
   resetHideTimeout();
@@ -162,7 +199,27 @@ document.addEventListener('DOMContentLoaded', () => {
       isHovering = false;
       resetHideTimeout();
     });
-}
+  }
+
+  // Add volume slider event listeners
+  const volumeSlider = document.getElementById('volume-slider');
+  if (volumeSlider) {
+    volumeSlider.addEventListener('mousedown', () => {
+      isUserAdjusting = true;
+    });
+    
+    volumeSlider.addEventListener('mouseup', () => {
+      isUserAdjusting = false;
+      adjustVolume(volumeSlider.value);
+    });
+    
+    volumeSlider.addEventListener('mouseleave', () => {
+      if (isUserAdjusting) {
+        isUserAdjusting = false;
+        adjustVolume(volumeSlider.value);
+      }
+    });
+  }
 
   // Add click event listeners to all interactive elements
   const interactiveElements = document.querySelectorAll('.button, .volume input[type="range"]');
@@ -185,8 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
   resetHideTimeout();
 });
 
-// Update song details every second
-setInterval(updateSongDetails, 1000);
+// Update song details and volume every second
+setInterval(async () => {
+  await updateSongDetails();
+  await getCurrentVolume();
+}, 1000);
 
 window.controlPlayback = (action) => {
   window.electronAPI.controlPlayback(action);

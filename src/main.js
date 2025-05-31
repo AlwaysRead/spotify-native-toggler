@@ -69,7 +69,7 @@ ipcMain.handle('get-current-song', async () => {
 });
 
 ipcMain.handle('set-volume', async (event, volume) => {
-  await setVolume(volume);
+  return await setVolume(volume);
 });
 
 ipcMain.handle('get-current-volume', async () => {

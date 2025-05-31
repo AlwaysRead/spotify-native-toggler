@@ -162,6 +162,12 @@
       outline: none;
       margin: 0;
       position: relative;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .volume input[type="range"]:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
     
     .volume input[type="range"]::-webkit-slider-thumb {
@@ -171,13 +177,19 @@
       background: #1DB954;
       border-radius: 50%;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transform: scale(1);
     }
     
     .volume input[type="range"]::-webkit-slider-thumb:hover {
       transform: scale(1.2);
       box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+    }
+    
+    .volume input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(0.95);
+      box-shadow: 0 1px 4px rgba(29, 185, 84, 0.2);
     }
     
     .volume label {
@@ -189,7 +201,7 @@
       gap: 8px;
       height: 100%;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .volume label:hover {
@@ -199,7 +211,7 @@
     .volume label svg {
       width: 20px;
       height: 20px;
-      transition: transform 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .volume.muted label {
@@ -212,6 +224,14 @@
     
     .volume.muted label svg {
       transform: scale(0.9);
+    }
+    
+    .volume.muted input[type="range"] {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .volume.muted input[type="range"]::-webkit-slider-thumb {
+      background: rgba(29, 185, 84, 0.5);
     }
     
     h2 {

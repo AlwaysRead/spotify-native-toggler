@@ -57,14 +57,43 @@ async function getCurrentSong() {
 
 async function setVolume(volume) {
   const accessToken = getAccessToken();
-  if (!accessToken) return;
+  if (!accessToken) return null;
+  
+  // Ensure volume is between 0 and 100
+  const validVolume = Math.max(0, Math.min(100, volume));
+  
   try {
-    await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=${volume}`, {}, {
+    // First, get the current device
+    const deviceResponse = await axios.get('https://api.spotify.com/v1/me/player', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    console.log(`Volume set to ${volume}%`);
+    
+    if (!deviceResponse.data.device) {
+      console.error('No active device found');
+      return null;
+    }
+
+    // Set the volume
+    await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=${validVolume}`, {}, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    // Verify the volume was set correctly
+    const verifyResponse = await axios.get('https://api.spotify.com/v1/me/player', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    const actualVolume = verifyResponse.data.device?.volume_percent;
+    if (actualVolume === validVolume) {
+      console.log(`Volume set to ${validVolume}%`);
+      return validVolume;
+    } else {
+      console.error(`Volume mismatch: requested ${validVolume}%, got ${actualVolume}%`);
+      return actualVolume;
+    }
   } catch (error) {
     console.error('Volume Control Error:', error.response?.data || error.message);
+    return null;
   }
 }
 
@@ -75,10 +104,17 @@ async function getCurrentVolume() {
     const response = await axios.get('https://api.spotify.com/v1/me/player', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    return response.data.device.volume_percent;
+    
+    if (!response.data.device) {
+      console.error('No active device found');
+      return 50; // Default to 50% if no device
+    }
+    
+    const volume = response.data.device.volume_percent;
+    return volume !== undefined ? volume : 50;
   } catch (error) {
     console.error('Error getting volume:', error.response?.data || error.message);
-    return null;
+    return 50; // Default to 50% on error
   }
 }
 
