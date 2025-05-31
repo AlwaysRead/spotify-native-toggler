@@ -1,12 +1,18 @@
+<div align="center">
+  
 # Spotify Native Toggler
 
-<div align="center">
+<img src="path/to/logo.png" alt="Spotify Native Toggler Logo" width="150" height="150">
 
-![Spotify Native Toggler](https://img.shields.io/badge/status-in_development-yellow)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green)
+[![Status](https://img.shields.io/badge/status-in_development-yellow)](https://github.com/AlwaysRead/spotify-native-toggler)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub Stars](https://img.shields.io/github/stars/AlwaysRead/spotify-native-toggler?style=social)](https://github.com/AlwaysRead/spotify-native-toggler/stargazers)
 
 **Control your Spotify playback without switching windows**
+
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Contributing](#contributing) • [License](#license)
 
 </div>
 
@@ -16,34 +22,33 @@ Spotify Native Toggler is a lightweight desktop application that provides global
 
 ### Why This Exists
 
-Windows 11 lacks a universal media controller, making it frustrating to manage music while deep in other tasks. Whether you're gaming intensely, in a coding flow state, or working across multiple applications, this tool ensures your music is always just a keyboard shortcut away.
+Windows 11 lacks a universal media controller, making it frustrating to manage music while deep in other tasks. Whether you're:
+- Gaming intensely
+- In a coding flow state
+- Working across multiple applications
 
-## Screenshots
-
-![App Screenshot 1](snapshots/image1.png)
-*Main interface with playback controls and volume slider*
-
-![App Screenshot 2](snapshots/image2.png)
-*Interface with album art and song information*
-
-> **Note:** The UI/UX design is currently a work in progress. I'm actively working on improving the app dimensions, padding, and overall layout to create a better user experience. Your feedback and suggestions are welcome!
+This tool ensures your music is always just a keyboard shortcut away.
 
 ## Features
 
-- **Global Playback Control**: Play, pause, and skip tracks from any application
-- **Real-time Display**: View current song title, artist, and album artwork
-- **Global Keyboard Shortcuts**: Control music without opening the app window
-- **Secure Authentication**: OAuth 2.0 integration with Spotify (Authorization Code Flow)
-- **Minimal Resource Usage**: Lightweight design to avoid system slowdown
+| Feature | Description |
+|---------|-------------|
+| **Global Playback Control** | Play, pause, and skip tracks from any application |
+| **Real-time Display** | View current song title, artist, and album artwork |
+| **Global Keyboard Shortcuts** | Control music without opening the app window |
+| **Secure Authentication** | OAuth 2.0 integration with Spotify (Authorization Code Flow) |
+| **Minimal Resource Usage** | Lightweight design to avoid system slowdown |
 
-## Prerequisites
+## Installation
+
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16 or later)
 - [Spotify Developer Account](https://developer.spotify.com/dashboard/applications)
 - [Electron](https://www.electronjs.org/) (installed via npm)
 - **Spotify Premium** account (required by Spotify API for playback control)
 
-## Installation
+### Setup
 
 1. **Clone the repository**
    ```bash
@@ -63,7 +68,7 @@ Windows 11 lacks a universal media controller, making it frustrating to manage m
    - Note your **Client ID** and **Client Secret**
 
 4. **Configure environment variables**
-   - Create a `.env` file in the project root:
+   Create a `.env` file in the project root:
    ```
    SPOTIFY_CLIENT_ID=your_spotify_client_id_here
    SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
@@ -81,18 +86,64 @@ Windows 11 lacks a universal media controller, making it frustrating to manage m
    > On first run, the app will open a browser window for Spotify authentication.
 
 2. **Global Shortcuts**
-   - `Ctrl+Shift+P` — Play
-   - `Ctrl+Shift+O` — Pause
-   - `Ctrl+Shift+N` — Next Track
-   - `Ctrl+Shift+B` — Previous Track
+
+   | Shortcut | Action |
+   |----------|--------|
+   | `Ctrl+Shift+P` | Play |
+   | `Ctrl+Shift+O` | Pause |
+   | `Ctrl+Shift+N` | Next Track |
+   | `Ctrl+Shift+B` | Previous Track |
 
 3. **App Interface**
    - View current song information and album artwork
    - Use on-screen controls for playback
 
+## Screenshots
+
+<div align="center">
+  <img src="snapshots/image2.png" alt="Main Interface" width="600">
+  <p><em>Main interface with playback controls and volume slider</em></p>
+</div>
+
+> **Note:** The UI/UX design is currently a work in progress. I'm actively working on improving the UI looks and overall layout. I am really bad at CSS. You can reach out to me if you want to help :)!
+
+## Development
+
+### Project Structure
+
+```
+spotify-native-toggler/
+├── src/
+│   ├── main.js       # Main Electron process
+│   ├── renderer.js   # Renderer process
+│   └── auth.js       # Spotify authentication
+├── assets/           # App icons and images
+├── public/           # Static files
+└── snapshots/        # Screenshots
+```
+
+### Building from Source
+
+```bash
+# Install all dependencies
+npm install
+
+# Run in development mode
+npm run dev
+
+# Build for production
+npm run build
+```
+
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
@@ -106,5 +157,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-<p>Built by <a href="https://github.com/AlwaysRead">AlwaysRead</a></p>
+  <p>Made with by <a href="https://github.com/AlwaysRead">AlwaysRead</a></p>
+  
+  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Report Bug</a>
+  •
+  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Request Feature</a>
 </div>
