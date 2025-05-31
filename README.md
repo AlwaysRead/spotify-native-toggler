@@ -1,153 +1,132 @@
 <div align="center">
-  
+
 # Spotify Native Toggler
 
-**Control your Spotify playback without switching windows**
+**Control Spotify playback seamlessly without switching windows**
+
+</div>
 
 ## Overview
 
-Spotify Native Toggler is a lightweight desktop application that provides global control over your Spotify playback from anywhere on your system. No more Alt+Tab interruptions during your workflow!
+Spotify Native Toggler is a lightweight, cross-platform desktop application that enables you to control Spotify playback from any application, ensuring uninterrupted focus during work, gaming, or multitasking.
 
-### Why This Exists
+## Purpose
 
-Windows 11 lacks a universal media controller, making it frustrating to manage music while deep in other tasks. Whether you're:
-- Gaming intensely
-- In a coding flow state
+Windows 11 lacks a universal media controller, making it challenging to manage music playback when:
+
+- Engaged in gaming sessions
+- Focused on coding or other intensive tasks
 - Working across multiple applications
 
-This tool ensures your music is always just a keyboard shortcut away.
+This tool provides quick access to Spotify controls via global keyboard shortcuts, keeping your workflow smooth.
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **Global Playback Control** | Play, pause, and skip tracks from any application |
-| **Real-time Display** | View current song title, artist, and album artwork |
-| **Global Keyboard Shortcuts** | Control music without opening the app window |
-| **Secure Authentication** | OAuth 2.0 integration with Spotify (Authorization Code Flow) |
-| **Minimal Resource Usage** | Lightweight design to avoid system slowdown |
+| Feature                     | Description                                            |
+|-----------------------------|--------------------------------------------------------|
+| Global Playback Control     | Play, pause, or skip tracks from any application       |
+| Real-Time Display           | View current song title, artist, and album artwork     |
+| Global Keyboard Shortcuts   | Manage playback without switching windows            |
+| Secure Authentication       | Utilizes OAuth 2.0 Authorization Code Flow             |
+| Low Resource Usage          | Runs efficiently in the background                     |
+
+## Download
+
+Pre-built binaries for Spotify Native Toggler are available for Windows, macOS, and Linux. Download the latest release from the GitHub Releases page:
+
+- [Download Latest Release](https://github.com/AlwaysRead/spotify-native-toggler/releases)
+
+**Note:** Ensure you have a Spotify Premium account to use the application, as it is required for API playback control.
 
 ## Installation
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or later)
-- [Spotify Developer Account](https://developer.spotify.com/dashboard/applications)
-- [Electron](https://www.electronjs.org/) (installed via npm)
-- **Spotify Premium** account (required by Spotify API for playback control)
+- [Node.js](https://nodejs.org/) (version 16 or higher)
+- [Spotify Developer Account](https://developer.spotify.com/dashboard)
+- [Electron](https://www.electronjs.org/) (installed via npm for source builds)
+- A Spotify Premium account (required for API playback control)
 
-### Setup
+### Setup Instructions
 
-1. **Clone the repository**
+1. **Clone the Repository** (for source builds)
+
    ```bash
    git clone https://github.com/AlwaysRead/spotify-native-toggler.git
    cd spotify-native-toggler
    ```
 
-2. **Install dependencies**
+2. **Install Dependencies** (for source builds)
+
    ```bash
    npm install express open
    ```
 
-3. **Set up your Spotify Developer Account**
-   - Navigate to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications)
+3. **Set Up a Spotify Application**
+
+   - Visit the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
    - Create a new application
    - Add `http://127.0.0.1:3000/callback` as a Redirect URI
    - Note your **Client ID** and **Client Secret**
 
-4. **Configure environment variables**
-   Create a `.env` file in the project root:
-   ```
-   SPOTIFY_CLIENT_ID=your_spotify_client_id_here
-   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
+4. **Configure Environment Variables** (for source builds)
+
+   Create a `.env` file in the project root with the following:
+
+   ```plaintext
+   SPOTIFY_CLIENT_ID=your_spotify_client_id
+   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
    SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback
    ```
 
-   > **Warning:** Never commit your `.env` file to version control or share your client secret publicly.
+   **Note:** Never commit or share your `.env` file publicly.
 
 ## Usage
 
-1. **Start the application**
-   ```bash
-   npm start
-   ```
-   > On first run, the app will open a browser window for Spotify authentication.
+### Starting the Application
 
-2. **Global Shortcuts**
+For pre-built binaries, launch the application by running the executable file downloaded from the releases page. For source builds, use:
 
-   | Shortcut | Action |
-   |----------|--------|
-   | `Ctrl+Shift+P` | Play |
-   | `Ctrl+Shift+O` | Pause |
-   | `Ctrl+Shift+N` | Next Track |
-   | `Ctrl+Shift+B` | Previous Track |
+```bash
+npm start
+```
 
-3. **App Interface**
-   - View current song information and album artwork
-   - Use on-screen controls for playback
+On first launch, a browser window will prompt you to authenticate with Spotify.
+
+### Global Keyboard Shortcuts
+
+| Shortcut           | Action            |
+|--------------------|-------------------|
+| Ctrl + Shift + P   | Play              |
+| Ctrl + Shift + O   | Pause             |
+| Ctrl + Shift + N   | Next Track        |
+| Ctrl + Shift + B   | Previous Track    |
+
+### Application Interface
+
+- Displays the current song, artist, and album artwork
+- Provides playback controls and a volume slider
 
 ## Screenshots
 
 <div align="center">
   <img src="snapshots/image2.png" alt="Main Interface" width="600">
-  <p><em>Main interface with playback controls and volume slider</em></p>
+  <p>Main interface with playback controls and volume slider</p>
 </div>
 
-> **Note:** The UI/UX design is currently a work in progress. I'm actively working on improving the UI looks and overall layout. I am really bad at CSS. You can reach out to me if you want to help :)!
-
-## Development
-
-### Project Structure
-
-```
-spotify-native-toggler/
-├── src/
-│   ├── main.js       # Main Electron process
-│   ├── renderer.js   # Renderer process
-│   └── auth.js       # Spotify authentication
-├── assets/           # App icons and images
-├── public/           # Static files
-└── snapshots/        # Screenshots
-```
-
-### Building from Source
-
-```bash
-# Install all dependencies
-npm install
-
-# Run in development mode
-npm run dev
-
-# Build for production
-npm run build
-```
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Note:** The user interface is under active development. Contributions from UI/UX or CSS experts are welcome.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-- [Spotify Web API](https://developer.spotify.com/documentation/web-api/) for making this integration possible
-- [Electron](https://www.electronjs.org/) for the cross-platform desktop framework
-
----
+- [Spotify Web API](https://developer.spotify.com/documentation/web-api)
+- [Electron](https://www.electronjs.org)
 
 <div align="center">
-  <p>Made with by <a href="https://github.com/AlwaysRead">AlwaysRead</a></p>
-  
-  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Report Bug</a>
-  •
-  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Request Feature</a>
+  <p>Developed by <a href="https://github.com/AlwaysRead">AlwaysRead</a></p>
+  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Report a Bug</a> • 
+  <a href="https://github.com/AlwaysRead/spotify-native-toggler/issues">Request a Feature</a>
 </div>
