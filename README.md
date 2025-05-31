@@ -18,6 +18,16 @@ Spotify Native Toggler is a lightweight desktop application that provides global
 
 Windows 11 lacks a universal media controller, making it frustrating to manage music while deep in other tasks. Whether you're gaming intensely, in a coding flow state, or working across multiple applications, this tool ensures your music is always just a keyboard shortcut away.
 
+## Screenshots
+
+![App Screenshot 1](snapshots/images1.png)
+*Main interface with playback controls and volume slider*
+
+![App Screenshot 2](snapshots/images2.png)
+*Interface with album art and song information*
+
+> **Note:** The UI/UX design is currently a work in progress. I'm actively working on improving the app dimensions, padding, and overall layout to create a better user experience. Your feedback and suggestions are welcome!
+
 ## Features
 
 - **Global Playback Control**: Play, pause, and skip tracks from any application
@@ -25,13 +35,6 @@ Windows 11 lacks a universal media controller, making it frustrating to manage m
 - **Global Keyboard Shortcuts**: Control music without opening the app window
 - **Secure Authentication**: OAuth 2.0 integration with Spotify (Authorization Code Flow)
 - **Minimal Resource Usage**: Lightweight design to avoid system slowdown
-
-## Screenshots
-
-<div align="center">
-<!-- Placeholder for screenshots -->
-<i>Coming soon! The application UI is currently under development.</i>
-</div>
 
 ## Prerequisites
 
