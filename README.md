@@ -4,10 +4,6 @@
 
 **Control your Spotify playback without switching windows**
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Contributing](#contributing) • [License](#license)
-
-</div>
-
 ## Overview
 
 Spotify Native Toggler is a lightweight desktop application that provides global control over your Spotify playback from anywhere on your system. No more Alt+Tab interruptions during your workflow!
