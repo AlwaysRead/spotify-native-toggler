@@ -4,11 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spotify Toggle App</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <style>
+      /* ===== GLOBAL STYLES ===== */
       * {
         margin: 0;
         padding: 0;
@@ -19,13 +16,12 @@
         display: none;
       }
 
+      /* ===== LAYOUT & TYPOGRAPHY ===== */
       body {
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
           "Helvetica Neue", sans-serif;
         background: transparent;
         color: white;
-        margin: 0;
-        padding: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -36,6 +32,7 @@
         position: relative;
       }
 
+      /* ===== MAIN CONTAINER ===== */
       .container {
         display: flex;
         align-items: center;
@@ -64,6 +61,7 @@
         display: none;
       }
 
+      /* ===== ALBUM COVER ===== */
       .album-cover {
         width: 140px;
         height: 140px;
@@ -102,6 +100,7 @@
         opacity: 1;
       }
 
+      /* ===== SONG INFO ===== */
       .song-info {
         flex: 1;
         text-align: left;
@@ -110,6 +109,7 @@
         max-width: 280px;
       }
 
+      /* ===== CONTROLS ===== */
       .controls {
         display: flex;
         align-items: center;
@@ -120,6 +120,7 @@
         -webkit-app-region: no-drag;
       }
 
+      /* ===== BUTTONS ===== */
       .button {
         background: rgba(255, 255, 255, 0.15);
         border: none;
@@ -259,6 +260,7 @@
         height: 24px;
       }
 
+      /* ===== PIN BUTTON ===== */
       .pin-button {
         position: absolute;
         top: 8px;
@@ -315,6 +317,7 @@
         transform: scale(0.95);
       }
 
+      /* ===== VOLUME CONTROLS ===== */
       .volume {
         display: flex;
         align-items: center;
@@ -446,6 +449,7 @@
         transition: color 0.3s ease;
       }
 
+      /* ===== ANIMATIONS & KEYFRAMES ===== */
       /* Subtle animations */
       @keyframes fadeIn {
         from {
@@ -512,6 +516,8 @@
       }
     </style>
   </head>
+
+  <!-- ===== HTML STRUCTURE ===== -->
   <body>
     <div class="container">
       <button class="pin-button" id="pin-button" title="Pin/Unpin Player">
