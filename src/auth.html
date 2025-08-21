@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Authentication</title>
+    <style>
+      /* ===== GLOBAL STYLES ===== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      ::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* ===== LAYOUT & TYPOGRAPHY ===== */
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", sans-serif;
+        background: linear-gradient(135deg, #121212 0%, #1a3c34 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        overflow: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(29, 185, 84, 0.15),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 70% 70%,
+            rgba(29, 185, 84, 0.1),
+            transparent 50%
+          );
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      /* ===== MAIN CONTAINER ===== */
+      .auth-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 360px;
+        width: 90%;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .auth-container:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      /* ===== LOGO & BRANDING ===== */
+      .spotify-logo {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 20px;
+        background: #1db954;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .spotify-logo:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 20px rgba(29, 185, 84, 0.4);
+      }
+
+      .spotify-logo svg {
+        width: 32px;
+        height: 32px;
+        fill: #ffffff;
+      }
+
+      /* ===== TYPOGRAPHY ===== */
+      .auth-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #ffffff;
+      }
+
+      .auth-subtitle {
+        font-size: 14px;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 28px;
+        line-height: 1.6;
+      }
+
+      /* ===== BUTTONS ===== */
+      .login-button {
+        background: #1db954;
+        border: none;
+        border-radius: 32px;
+        padding: 14px 28px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+        min-width: 180px;
+        position: relative;
+        overflow: hidden;
+        font-family: inherit;
+      }
+
+      .login-button:hover {
+        background: #1ed760;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(29, 185, 84, 0.4);
+      }
+
+      .login-button:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+      }
+
+      .login-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ===== STATUS MESSAGES ===== */
+      .status-message {
+        margin-top: 20px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      .status-message.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .status-message.error {
+        background: rgba(255, 69, 58, 0.15);
+        border: 1px solid rgba(255, 69, 58, 0.2);
+        color: #ff6b6b;
+      }
+
+      .status-message.success {
+        background: rgba(29, 185, 84, 0.15);
+        border: 1px solid rgba(29, 185, 84, 0.2);
+        color: #1ed760;
+      }
+
+      .status-message.loading {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+
+      /* ===== LOADING SPINNER ===== */
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #ffffff;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== FOOTER ===== */
+      .auth-footer {
+        margin-top: 28px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.5;
+      }
+
+      .auth-footer a {
+        color: #1db954;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .auth-footer a:hover {
+        color: #1ed760;
+      }
+
+      /* ===== ANIMATIONS ===== */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .auth-container {
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      /* ===== RESPONSIVE DESIGN ===== */
+      @media (max-width: 480px) {
+        .auth-container {
+          padding: 24px;
+          width: 95%;
+        }
+
+        .auth-title {
+          font-size: 20px;
+        }
+
+        .auth-subtitle {
+          font-size: 13px;
+        }
+
+        .login-button {
+          padding: 12px 24px;
+          font-size: 13px;
+          min-width: 160px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="spotify-logo">
+        <svg viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M83.996 0C37.747 0 0 37.747 0 83.996c0 46.251 37.747 83.996 83.996 83.996 46.251 0 83.996-37.747 83.996-83.996C167.992 37.747 130.247 0 83.996 0zm38.622 121.176c-1.508 2.47-4.729 3.245-7.201 1.739-19.735-12.061-44.607-14.794-73.87-8.103-2.825 0.646-5.653-1.317-6.297-4.142-0.646-2.825 1.317-5.653 4.142-6.297 32.205-7.356 59.847-4.181 81.971 9.382 2.47 1.508 3.245 4.729 1.737 7.201zm10.288-22.903c-1.898 3.091-5.939 4.065-9.031 2.166-22.582-13.889-56.994-17.906-83.709-9.789-3.637 1.105-7.482-0.951-8.588-4.588-1.105-3.637 0.951-7.482 4.588-8.588 30.413-9.242 68.222-4.758 94.585 11.135 3.091 1.898 4.065 5.939 2.166 9.031zm0.883-23.848c-27.058-16.061-71.717-17.548-97.567-9.706-4.381 1.33-9.007-1.144-10.336-5.525-1.33-4.381 1.144-9.007 5.525-10.336 29.581-8.98 78.756-7.245 109.83 10.998 3.7 2.176 4.919 6.912 2.743 10.612-2.176 3.7-6.912 4.919-10.612 2.743z"
+          />
+        </svg>
+      </div>
+
+      <h1 class="auth-title">Connect to Spotify</h1>
+      <p class="auth-subtitle">
+        Sign in with your Spotify account to control your music playback
+      </p>
+
+      <button
+        class="login-button"
+        id="login-btn"
+        onclick="authenticateSpotify()"
+      >
+        <span id="button-text">Connect with Spotify</span>
+      </button>
+
+      <div class="status-message" id="status-message"></div>
+
+      <div class="auth-footer">
+        <p>
+          We only access your currently playing track and playback controls.<br />
+          <a
+            href="https://developer.spotify.com/documentation/general/guides/authorization/scopes/"
+            target="_blank"
+          >
+            Learn more about permissions
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      let isAuthenticating = false;
+
+      function showStatus(message, type = "loading") {
+        const statusEl = document.getElementById("status-message");
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type} show`;
+      }
+
+      function hideStatus() {
+        const statusEl = document.getElementById("status-message");
+        statusEl.classList.remove("show");
+      }
+
+      function setButtonLoading(loading) {
+        const button = document.getElementById("login-btn");
+        const buttonText = document.getElementById("button-text");
+
+        if (loading) {
+          button.disabled = true;
+          buttonText.innerHTML = '<span class="spinner"></span>Connecting...';
+        } else {
+          button.disabled = false;
+          buttonText.textContent = "Connect with Spotify";
+        }
+      }
+
+      async function authenticateSpotify() {
+        if (isAuthenticating) return;
+
+        isAuthenticating = true;
+        setButtonLoading(true);
+        showStatus("Connecting to Spotify...", "loading");
+
+        // TEST DIFFERENT ERROR CONDITIONS (uncomment to test):
+
+        // Test 1: Simulate network error
+        // setTimeout(() => {
+        //   showStatus("Network error. Please check your connection.", "error");
+        //   setButtonLoading(false);
+        //   isAuthenticating = false;
+        //   setTimeout(hideStatus, 5000);
+        // }, 2000);
+        // return;
+
+        // Test 2: Simulate invalid credentials
+        // setTimeout(() => {
+        //   showStatus("Invalid Spotify credentials. Please check your app settings.", "error");
+        //   setButtonLoading(false);
+        //   isAuthenticating = false;
+        //   setTimeout(hideStatus, 5000);
+        // }, 2000);
+        // return;
+
+        // Test 3: Simulate timeout
+        // setTimeout(() => {
+        //   showStatus("Authentication timed out. Please try again.", "error");
+        //   setButtonLoading(false);
+        //   isAuthenticating = false;
+        //   setTimeout(hideStatus, 5000);
+        // }, 5000);
+        // return;
+
+        try {
+          const result = await window.electronAPI.authenticate();
+
+          if (result.success) {
+            showStatus(
+              "Successfully connected! Launching player...",
+              "success"
+            );
+            setTimeout(() => {
+              window.electronAPI.closeAuthWindow();
+            }, 1500);
+          } else {
+            throw new Error(result.error || "Authentication failed");
+          }
+        } catch (error) {
+          console.error("Authentication error:", error);
+          showStatus(
+            error.message || "Failed to connect. Please try again.",
+            "error"
+          );
+          setButtonLoading(false);
+          setTimeout(hideStatus, 5000);
+        } finally {
+          isAuthenticating = false;
+        }
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !isAuthenticating) {
+          authenticateSpotify();
+        }
+      });
+
+      window.addEventListener("load", () => {
+        document.getElementById("login-btn").focus();
+      });
+    </script>
+  </body>
+</html>

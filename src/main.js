@@ -16,6 +16,7 @@ const { authenticate } = require("../spotifyAuth");
 const { registerGlobalShortcuts } = require("../globalShortcuts");
 
 let mainWindow = null;
+let authWindow = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -63,6 +64,34 @@ function createWindow() {
   });
 }
 
+function createAuthWindow() {
+  authWindow = new BrowserWindow({
+    width: 500,
+    height: 600,
+    minWidth: 500,
+    minHeight: 600,
+    resizable: false,
+    show: true,
+    center: true,
+    frame: false,
+    transparent: true,
+    backgroundColor: "#00000000",
+    webPreferences: {
+      preload: path.join(__dirname, "auth-preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  authWindow.loadFile(path.join(__dirname, "auth.html"));
+
+  authWindow.on("closed", () => {
+    authWindow = null;
+  });
+
+  return authWindow;
+}
+
 function toggleWindow() {
   if (mainWindow.isVisible()) {
     mainWindow.hide();
@@ -74,9 +103,8 @@ function toggleWindow() {
 }
 
 app.whenReady().then(async () => {
-  await authenticate();
-  createWindow();
-  registerGlobalShortcuts(toggleWindow);
+  // Always show auth window first - let user choose to connect
+  createAuthWindow();
 });
 
 app.on("window-all-closed", () => {
@@ -104,5 +132,35 @@ ipcMain.handle("get-current-volume", async () => {
 ipcMain.handle("hide-window", () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.hide();
+  }
+});
+
+// Authentication window handlers
+ipcMain.handle("authenticate-spotify", async () => {
+  try {
+    console.log("Starting authentication...");
+    await authenticate();
+    console.log("Authentication successful!");
+
+    // Give a small delay to ensure everything is ready
+    setTimeout(() => {
+      if (authWindow && !authWindow.isDestroyed()) {
+        authWindow.webContents.send("auth-success");
+      }
+    }, 500);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle("close-auth-window", () => {
+  if (authWindow && !authWindow.isDestroyed()) {
+    authWindow.close();
+    // Create main window after successful authentication
+    createWindow();
+    registerGlobalShortcuts(toggleWindow);
   }
 });

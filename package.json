@@ -12,5 +12,8 @@
     "electron": "^24.1.0",
     "express": "^5.1.0",
     "open": "^10.2.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^26.0.12"
   }
 }

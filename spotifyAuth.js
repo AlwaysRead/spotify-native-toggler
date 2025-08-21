@@ -7,6 +7,7 @@ SPOTIFY_CLIENT_SECRET=_
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/callback*/
 const axios = require("axios");
 const express = require("express");
+const { shell } = require("electron");
 require("dotenv").config();
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
@@ -72,7 +73,64 @@ async function authenticate() {
         );
         accessToken = tokenRes.data.access_token;
         refreshToken = tokenRes.data.refresh_token;
-        res.send("Authentication successful! You can close this window.");
+
+        // Send a styled success page that auto-closes
+        res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Authentication Successful</title>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+                background: linear-gradient(135deg, #1db954, #1ed760);
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                text-align: center;
+              }
+              .success-container {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+              }
+              .checkmark {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 30px;
+              }
+              h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: 600; }
+              p { margin: 0; opacity: 0.9; font-size: 16px; }
+            </style>
+          </head>
+          <body>
+            <div class="success-container">
+              <div class="checkmark">✓</div>
+              <h1>Authentication Successful!</h1>
+              <p>You can close this window.</p>
+            </div>
+            <script>
+              // Auto-close after 2 seconds
+              setTimeout(() => {
+                window.close();
+              }, 2000);
+            </script>
+          </body>
+          </html>
+        `);
         resolve();
       } catch (err) {
         console.error(
@@ -87,8 +145,8 @@ async function authenticate() {
     });
 
     server = app.listen(3000, "127.0.0.1", async () => {
-      const open = (await import("open")).default;
-      await open(getAuthUrl());
+      // Use Electron's shell to open the URL
+      await shell.openExternal(getAuthUrl());
     });
   });
 }
