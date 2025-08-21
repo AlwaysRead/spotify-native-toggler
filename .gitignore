@@ -1,8 +1,9 @@
 # Node modules
 node_modules/
 
-# Environment variables
-.env
+# User credentials and tokens (now stored in user's home directory)
+# Note: These files are stored in ~/.spotify-native-toggler/ not in project directory
+*.json.backup
 
 # OS generated files
 .DS_Store
@@ -18,4 +19,4 @@ yarn-error.log*
 
 # Electron build output
 dist/
-out/ 
+out/

@@ -1,6 +1,6 @@
-require("dotenv").config();
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
+const { hasCredentials, saveCredentials } = require("./credentialsManager");
 
 // Suppress cache warnings
 app.commandLine.appendSwitch("--disable-gpu-sandbox");
@@ -17,6 +17,7 @@ const { registerGlobalShortcuts } = require("../globalShortcuts");
 
 let mainWindow = null;
 let authWindow = null;
+let setupWindow = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -92,6 +93,34 @@ function createAuthWindow() {
   return authWindow;
 }
 
+function createSetupWindow() {
+  setupWindow = new BrowserWindow({
+    width: 650,
+    height: 800,
+    minWidth: 650,
+    minHeight: 800,
+    resizable: false,
+    show: true,
+    center: true,
+    frame: false,
+    transparent: true,
+    backgroundColor: "#00000000",
+    webPreferences: {
+      preload: path.join(__dirname, "setup-preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  setupWindow.loadFile(path.join(__dirname, "setup.html"));
+
+  setupWindow.on("closed", () => {
+    setupWindow = null;
+  });
+
+  return setupWindow;
+}
+
 function toggleWindow() {
   if (mainWindow.isVisible()) {
     mainWindow.hide();
@@ -103,8 +132,14 @@ function toggleWindow() {
 }
 
 app.whenReady().then(async () => {
-  // Always show auth window first - let user choose to connect
-  createAuthWindow();
+  // Check if user has set up their Spotify app credentials
+  if (!hasCredentials()) {
+    // Show setup window first
+    createSetupWindow();
+  } else {
+    // Show auth window if credentials exist
+    createAuthWindow();
+  }
 });
 
 app.on("window-all-closed", () => {
@@ -162,5 +197,35 @@ ipcMain.handle("close-auth-window", () => {
     // Create main window after successful authentication
     createWindow();
     registerGlobalShortcuts(toggleWindow);
+  }
+});
+
+// Setup window handlers
+ipcMain.handle("save-credentials", async (event, credentials) => {
+  try {
+    const success = saveCredentials(
+      credentials.clientId,
+      credentials.clientSecret
+    );
+    if (success) {
+      return { success: true };
+    } else {
+      return { success: false, error: "Failed to save credentials" };
+    }
+  } catch (error) {
+    console.error("Error saving credentials:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle("open-external", async (event, url) => {
+  await shell.openExternal(url);
+});
+
+ipcMain.handle("setup-complete", () => {
+  if (setupWindow && !setupWindow.isDestroyed()) {
+    setupWindow.close();
+    // Show auth window after setup is complete
+    createAuthWindow();
   }
 });

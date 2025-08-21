@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Native Toggler - Setup</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Inter",
+          "Helvetica Neue", sans-serif;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1c2526 100%);
+        color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .setup-container::-webkit-scrollbar {
+        width: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .setup-container:hover::-webkit-scrollbar,
+      .setup-container.scrolling::-webkit-scrollbar {
+        opacity: 1;
+      }
+
+      .setup-container::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 4px;
+      }
+
+      .setup-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #1db954, #1ed760);
+        border-radius: 4px;
+      }
+
+      .setup-container {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(24px);
+        border: 1px solid transparent;
+        border-image: linear-gradient(
+            135deg,
+            rgba(29, 185, 84, 0.3),
+            rgba(255, 255, 255, 0.15)
+          )
+          1;
+        border-radius: 24px;
+        padding: 48px;
+        max-width: 640px;
+        width: 100%;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.8s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+      }
+
+      @media (max-width: 480px) {
+        .setup-container {
+          padding: 24px;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        .subtitle,
+        .note {
+          font-size: 15px;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .spotify-logo {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 32px;
+        display: block;
+        filter: drop-shadow(0 6px 12px rgba(29, 185, 84, 0.4));
+        transition: transform 0.3s ease;
+      }
+
+      .spotify-logo:hover {
+        transform: scale(1.1);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 17px;
+        margin-bottom: 32px;
+        line-height: 1.6;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .note {
+        background: rgba(29, 185, 84, 0.15);
+        border: 1px solid rgba(29, 185, 84, 0.3);
+        color: #1ed760;
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin: 24px 0 40px;
+        font-size: 14px;
+        text-align: center;
+        line-height: 1.7;
+      }
+
+      .step {
+        margin-bottom: 32px;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .step:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .step-number {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 32px;
+        font-weight: 700;
+        font-size: 16px;
+        margin-right: 16px;
+      }
+
+      .step-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+      }
+
+      .step-content {
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.7;
+        margin-left: 48px;
+        font-size: 15px;
+      }
+
+      .code-block {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-family: "JetBrains Mono", "SF Mono", monospace;
+        font-size: 14px;
+        margin: 12px 0;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #1ed760;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .code-block::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #1db954, #1ed760);
+      }
+
+      .copy-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #1ed760;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.3s ease;
+      }
+
+      .copy-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 15px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 14px 20px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 10px;
+        color: white;
+        font-size: 15px;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #1ed760;
+        box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.15);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      .form-group:hover input {
+        transform: scale(1.01);
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-10%);
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-password:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .toggle-password svg {
+        width: 18px;
+        height: 18px;
+        fill: #1ed760;
+      }
+
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+
+      .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        text-align: center;
+        padding: 8px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .setup-form {
+        background: rgba(255, 255, 255, 0.04);
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        margin-top: 32px;
+      }
+
+      .form-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      .save-button {
+        width: 100%;
+        height: 48px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: white;
+        border: none;
+        border-radius: 24px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .save-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      .save-button:hover::before {
+        left: 100%;
+      }
+
+      .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(29, 185, 84, 0.4);
+      }
+
+      .save-button:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 12px rgba(29, 185, 84, 0.3);
+      }
+
+      .save-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #fff;
+        border-top: 3px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+      }
+
+      .save-button.saving .spinner {
+        display: inline-block;
+      }
+
+      .save-button.saving span {
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .external-link {
+        color: #1ed760;
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .external-link:hover {
+        border-bottom-color: #1ed760;
+        color: #1ed760;
+      }
+
+      .error {
+        background: rgba(255, 69, 69, 0.15);
+        border: 1px solid rgba(255, 69, 69, 0.3);
+        color: #ff6b6b;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-top: 12px;
+        font-size: 14px;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .success {
+        background: rgba(29, 185, 84, 0.15);
+        border: 1px solid rgba(29, 185, 84, 0.3);
+        color: #1ed760;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-top: 12px;
+        font-size: 14px;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="setup-container" role="main">
+      <svg
+        class="spotify-logo"
+        viewBox="0 0 24 24"
+        fill="#1ed760"
+        aria-label="Spotify Logo"
+      >
+        <path
+          d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm5.568 17.328c-.24.384-.768.504-1.152.264-3.156-1.932-7.128-2.364-11.808-1.296-.456.108-.912-.192-1.02-.648-.108-.456.192-.912.648-1.02 5.064-1.164 9.468-.672 12.876 1.476.384.24.504.768.264 1.152l.192.072zm1.632-3.624c-.3.48-.948.636-1.428.336-3.612-2.22-9.12-2.868-13.392-1.572-.552.168-1.128-.192-1.296-.744-.168-.552.192-1.128.744-1.296 4.896-1.488 10.992-.828 15.12 1.788.48.3.636.948.336 1.428l-.084.06zm.144-3.756C15.24 7.344 8.856 7.164 5.148 8.172c-.648.18-1.32-.192-1.5-.84-.18-.648.192-1.32.84-1.5 4.272-1.164 11.52-.948 15.876 1.764.564.348.744 1.116.396 1.68-.348.564-1.116.744-1.68.396l.264-.024z"
+        />
+      </svg>
+
+      <h1>Setup Your Spotify App</h1>
+      <p class="subtitle">
+        To use Spotify Native Toggler, create your Spotify app and provide your
+        credentials for seamless integration.
+      </p>
+      <div class="note" role="alert">
+        <strong>Important:</strong> Only Spotify Premium users can control
+        playback (play, pause, skip, volume) with this app. Do not share your
+        Client ID or Client Secret with anyone.
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">1</span>
+          Create a Spotify App
+        </div>
+        <div class="step-content">
+          Visit the
+          <a
+            href="#"
+            class="external-link"
+            onclick="openSpotifyDashboard()"
+            aria-label="Open Spotify Developer Dashboard"
+          >
+            Spotify Developer Dashboard
+          </a>
+          and follow these steps:
+          <ul style="margin: 12px 0; padding-left: 24px">
+            <li>Click "Create App"</li>
+            <li>Enter an app name (e.g., "My Spotify Controller")</li>
+            <li>Add this redirect URI:</li>
+          </ul>
+          <div class="code-block">
+            <span id="redirect-uri">http://127.0.0.1:3000/callback</span>
+            <button
+              class="copy-button"
+              onclick="copyRedirectUri()"
+              aria-label="Copy redirect URI"
+            >
+              Copy
+            </button>
+          </div>
+          <ul style="margin: 12px 0; padding-left: 24px">
+            <li>Select "Web API" in the APIs section</li>
+            <li>Agree to terms and create the app</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">2</span>
+          Get Your Credentials
+        </div>
+        <div class="step-content">
+          In your new Spotify app:
+          <ul style="margin: 12px 0; padding-left: 24px">
+            <li>Copy the <strong>Client ID</strong></li>
+            <li>
+              Click "Show client secret" and copy the
+              <strong>Client Secret</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">3</span>
+          Enter Your Credentials
+        </div>
+        <div class="step-content">Paste your credentials below to proceed:</div>
+      </div>
+
+      <div class="setup-form">
+        <div class="form-title">Spotify App Credentials</div>
+
+        <div class="form-group">
+          <label for="clientId">Client ID</label>
+          <input
+            type="text"
+            id="clientId"
+            placeholder="Your Spotify Client ID"
+            autocomplete="off"
+            spellcheck="false"
+            autofocus
+            aria-required="true"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="clientSecret"> Client Secret </label>
+          <input
+            type="password"
+            id="clientSecret"
+            placeholder="Your Spotify Client Secret"
+            autocomplete="off"
+            spellcheck="false"
+            aria-required="true"
+          />
+          <button
+            class="toggle-password"
+            onclick="togglePassword()"
+            aria-label="Toggle password visibility"
+          >
+            <svg class="show-icon" viewBox="0 0 24 24">
+              <path
+                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+              />
+            </svg>
+            <svg class="hide-icon" style="display: none" viewBox="0 0 24 24">
+              <path
+                d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.37 1.83l2.96 2.96C21.43 15.26 22 13.25 22 12c0-5.24-5.27-9.5-11-9.5-1.87 0-3.63.5-5.13 1.38l2.12 2.12c.57-.24 1.18-.37 1.83-.37zm-10.36-3.64l2.73 2.73C2.51 7.87 1 10.01 1 12c0 5.24 5.27 9.5 11 9.5 1.99 0 3.86-.53 5.46-1.46l2.81 2.81 1.41-1.41L2.36 2.36 1 3.64zm5.83 5.83l2.12 2.12c-.09.63-.25 1.22-.47 1.77-.55 1.36-1.72 2.36-3.13 2.74-1.41.38-2.88.14-4.14-.47l2.12-2.12c.55.22 1.14.38 1.77.47.63.09 1.26.02 1.83-.2.57-.22 1.06-.54 1.41-.94l2.12-2.12c-.38-.57-.94-1.06-1.54-1.41-.6-.35-1.24-.59-1.91-.69l-2.12-2.12c.66.1 1.31.34 1.91.69.6.35 1.16.84 1.54 1.41.38.57.59 1.2.66 1.87z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <button
+          class="save-button"
+          onclick="saveCredentials()"
+          aria-label="Save credentials and continue"
+        >
+          <span class="spinner"></span>
+          <span>Save & Continue</span>
+        </button>
+
+        <div id="message" role="alert"></div>
+      </div>
+    </div>
+
+    <script>
+      function openSpotifyDashboard() {
+        window.electronAPI.openExternal(
+          "https://developer.spotify.com/dashboard"
+        );
+      }
+
+      function togglePassword() {
+        const input = document.getElementById("clientSecret");
+        const showIcon = document.querySelector(".show-icon");
+        const hideIcon = document.querySelector(".hide-icon");
+        if (input.type === "password") {
+          input.type = "text";
+          showIcon.style.display = "none";
+          hideIcon.style.display = "block";
+        } else {
+          input.type = "password";
+          showIcon.style.display = "block";
+          hideIcon.style.display = "none";
+        }
+      }
+
+      function copyRedirectUri() {
+        const text = document.getElementById("redirect-uri").textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const button = document.querySelector(".copy-button");
+          button.textContent = "Copied!";
+          setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1500);
+        });
+      }
+
+      async function saveCredentials() {
+        const clientId = document.getElementById("clientId").value.trim();
+        const clientSecret = document
+          .getElementById("clientSecret")
+          .value.trim();
+        const messageDiv = document.getElementById("message");
+        const button = document.querySelector(".save-button");
+
+        // Clear previous messages
+        messageDiv.innerHTML = "";
+
+        // Validate inputs
+        if (!clientId || !clientSecret) {
+          messageDiv.innerHTML =
+            '<div class="error">Please fill in both Client ID and Client Secret</div>';
+          return;
+        }
+
+        // Basic validation for Client ID format (should be 32 characters)
+        if (clientId.length !== 32) {
+          messageDiv.innerHTML =
+            '<div class="error">Client ID must be 32 characters long</div>';
+          return;
+        }
+
+        // Basic validation for Client Secret format (should be 32 characters)
+        if (clientSecret.length !== 32) {
+          messageDiv.innerHTML =
+            '<div class="error">Client Secret must be 32 characters long</div>';
+          return;
+        }
+
+        button.disabled = true;
+        button.classList.add("saving");
+
+        try {
+          const result = await window.electronAPI.saveCredentials({
+            clientId,
+            clientSecret,
+          });
+
+          if (result.success) {
+            messageDiv.innerHTML =
+              '<div class="success">Credentials saved successfully! Starting authentication...</div>';
+            setTimeout(() => {
+              window.electronAPI.setupComplete();
+            }, 1500);
+          } else {
+            messageDiv.innerHTML = `<div class="error">${
+              result.error || "Failed to save credentials. Please try again."
+            }</div>`;
+            button.disabled = false;
+            button.classList.remove("saving");
+          }
+        } catch (error) {
+          messageDiv.innerHTML =
+            '<div class="error">Failed to save credentials. Check your network and try again.</div>';
+          button.disabled = false;
+          button.classList.remove("saving");
+        }
+      }
+
+      // Allow Enter key to submit
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          saveCredentials();
+        }
+      });
+
+      // Handle scrollbar visibility on scroll
+      const container = document.querySelector(".setup-container");
+      let scrollTimeout;
+      container.addEventListener("scroll", () => {
+        container.classList.add("scrolling");
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          container.classList.remove("scrolling");
+        }, 1000);
+      });
+
+      // Scroll to top on page load
+      window.addEventListener("load", () => {
+        container.scrollTop = 0;
+      });
+    </script>
+  </body>
+</html>
