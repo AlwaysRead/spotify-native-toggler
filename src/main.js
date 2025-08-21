@@ -1,6 +1,11 @@
 require("dotenv").config();
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
+
+// Suppress cache warnings
+app.commandLine.appendSwitch("--disable-gpu-sandbox");
+app.commandLine.appendSwitch("--disable-software-rasterizer");
+
 const {
   controlPlayback,
   getCurrentSong,
