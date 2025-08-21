@@ -1,293 +1,590 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify Toggle App</title>
-  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    ::-webkit-scrollbar {
-      display: none;
-    }
-    
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: rgba(18, 18, 18, 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      color: white;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      -webkit-app-region: drag;
-      overflow: hidden;
-    }
-    
-    .container {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      width: 100%;
-      max-width: 600px;
-      padding: 12px 15px 12px 20px;
-      background: rgba(0, 0, 0, 0.3);
-      position: relative;
-      opacity: 1;
-      transition: opacity 0.3s ease;
-    }
-    
-    .container.hiding {
-      opacity: 0;
-    }
-    
-    .container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(29, 185, 84, 0.2) 50%, 
-        transparent 100%
-      );
-    }
-    
-    .song-info {
-      flex: 1;
-      text-align: left;
-      -webkit-app-region: drag;
-      min-width: 0;
-      margin-right: 15px;
-    }
-    
-    .album-cover {
-      width: 110px;
-      height: 110px;
-      border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      -webkit-app-region: drag;
-      transition: transform 0.3s ease;
-      flex-shrink: 0;
-    }
-    
-    .album-cover:hover {
-      transform: scale(1.02);
-    }
-    
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-top: 12px;
-      -webkit-app-region: no-drag;
-    }
-    
-    .button {
-      background: transparent;
-      border: none;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: rgba(255, 255, 255, 0.8);
-      -webkit-app-region: no-drag;
-      padding: 0;
-      position: relative;
-      flex-shrink: 0;
-    }
-    
-    .button::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: rgba(29, 185, 84, 0.1);
-      border-radius: 50%;
-      transform: scale(0);
-      transition: transform 0.2s ease;
-    }
-    
-    .button:hover {
-      color: #1DB954;
-    }
-    
-    .button:hover::after {
-      transform: scale(1);
-    }
-    
-    .button:active {
-      transform: scale(0.95);
-    }
-    
-    .button svg {
-      width: 24px;
-      height: 24px;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .volume {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      -webkit-app-region: no-drag;
-      height: 40px;
-      position: relative;
-      flex-shrink: 0;
-      min-width: 140px;
-      margin-left: 15px;
-    }
-    
-    .volume input[type="range"] {
-      width: 80px;
-      height: 4px;
-      -webkit-appearance: none;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      outline: none;
-      margin: 0;
-      position: relative;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    
-    .volume input[type="range"]:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    .volume input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      background: #1DB954;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transform: scale(1);
-    }
-    
-    .volume input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-      box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
-    }
-    
-    .volume input[type="range"]::-webkit-slider-thumb:active {
-      transform: scale(0.95);
-      box-shadow: 0 1px 4px rgba(29, 185, 84, 0.2);
-    }
-    
-    .volume label {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      height: 100%;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .volume label:hover {
-      color: #1DB954;
-    }
-    
-    .volume label svg {
-      width: 20px;
-      height: 20px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .volume.muted label {
-      color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .volume.muted label:hover {
-      color: rgba(29, 185, 84, 0.6);
-    }
-    
-    .volume.muted label svg {
-      transform: scale(0.9);
-    }
-    
-    .volume.muted input[type="range"] {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .volume.muted input[type="range"]::-webkit-slider-thumb {
-      background: rgba(29, 185, 84, 0.5);
-    }
-    
-    h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: white;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: -0.3px;
-    }
-    
-    p {
-      margin: 4px 0 0 0;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <img id="album-cover" class="album-cover" src="" alt="Album Cover">
-    <div class="song-info">
-      <h2 id="song-title">Song Title</h2>
-      <p id="song-artist">Artist Name</p>
-      <div class="controls">
-        <button class="button" onclick="window.controlPlayback('previous')" title="Previous Track">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-          </svg>
-        </button>
-        <button class="button" id="play-pause-btn" title="Play/Pause">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-        </button>
-        <button class="button" onclick="window.controlPlayback('next')" title="Next Track">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-          </svg>
-        </button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Toggle App</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      ::-webkit-scrollbar {
+        display: none;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+          "Helvetica Neue", sans-serif;
+        background: transparent;
+        color: white;
+        margin: 0;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        height: 200px;
+        width: 500px;
+        -webkit-app-region: drag;
+        overflow: visible;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        width: 470px;
+        max-width: 470px;
+        padding: 16px 20px;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 22px;
+        position: relative;
+        opacity: 1;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 470px;
+        box-sizing: border-box;
+        margin: 15px;
+      }
+
+      .container.hiding {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+
+      .container::before {
+        display: none;
+      }
+
+      .album-cover {
+        width: 125px;
+        height: 125px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        -webkit-app-region: drag;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+        border: none;
+      }
+
+      .album-cover::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          transparent 0%,
+          rgba(29, 185, 84, 0.15) 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .album-cover:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+      }
+
+      .album-cover:hover::after {
+        opacity: 1;
+      }
+
+      .song-info {
+        flex: 1;
+        text-align: left;
+        -webkit-app-region: drag;
+        min-width: 0;
+        max-width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 24px;
+        margin-top: 12px;
+        -webkit-app-region: no-drag;
+        width: 100%;
+      }
+
+      .button {
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        color: rgba(255, 255, 255, 0.9);
+        -webkit-app-region: no-drag;
+        padding: 0;
+        position: relative;
+        flex-shrink: 0;
+        border-radius: 50%;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: scale(1);
+        will-change: transform;
+      }
+
+      /* Navigation buttons (prev/next) - outline style */
+      .button.nav-button {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .button.nav-button:hover {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 1);
+        transform: scale(1.08);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      .button.nav-button:active {
+        transform: scale(0.95);
+        transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(29, 185, 84, 0.15),
+          rgba(30, 215, 96, 0.15)
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .button:hover {
+        color: white;
+        transform: scale(1.12);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+          0 4px 15px rgba(29, 185, 84, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Play button when playing - pulse animation */
+      .button.playing {
+        animation: pulse 2s infinite;
+      }
+
+      .button:hover::before {
+        opacity: 1;
+      }
+
+      .button:active {
+        transform: scale(0.95);
+        transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .button.play-pause {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #1db954, #1ed760, #1ef765);
+        border: none;
+        color: white;
+        border-radius: 50%;
+        box-shadow: 0 8px 24px rgba(29, 185, 84, 0.5),
+          0 4px 16px rgba(0, 0, 0, 0.3), 0 0 20px rgba(29, 185, 84, 0.3);
+        position: relative;
+      }
+
+      .button.play-pause::after {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .button.play-pause:hover {
+        transform: translateY(-4px) scale(1.08);
+        box-shadow: 0 16px 40px rgba(29, 185, 84, 0.6),
+          0 8px 24px rgba(0, 0, 0, 0.4), 0 0 30px rgba(29, 185, 84, 0.5);
+      }
+
+      .button.play-pause:hover::after {
+        opacity: 0.3;
+      }
+
+      .button.play-pause::before {
+        display: none;
+      }
+
+      .button svg {
+        width: 20px;
+        height: 20px;
+        position: relative;
+        z-index: 1;
+        transition: transform 0.2s ease;
+      }
+
+      .button.play-pause svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .pin-button {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: rgba(255, 255, 255, 0.85);
+        -webkit-app-region: no-drag;
+        padding: 0;
+        border-radius: 50%;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        overflow: hidden;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+
+      .pin-button svg {
+        width: 16px;
+        height: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .pin-button:hover {
+        color: white;
+        background: rgba(29, 185, 84, 0.15);
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4),
+          0 3px 8px rgba(29, 185, 84, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+
+      .pin-button.pinned {
+        color: #1ed760;
+        background: rgba(29, 185, 84, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+          0 2px 6px rgba(29, 185, 84, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .pin-button.pinned svg {
+        transform: rotate(45deg);
+      }
+
+      .pin-button:active {
+        transform: scale(0.95);
+      }
+
+      .volume {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        -webkit-app-region: no-drag;
+        height: 40px;
+        position: relative;
+        flex-shrink: 0;
+        width: 100%;
+        margin-top: 8px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-left: -8px;
+      }
+
+      .volume input[type="range"] {
+        width: 160px;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: linear-gradient(90deg, #1db954, #3bd17f);
+        border-radius: 2px;
+        outline: none;
+        margin: 0;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4),
+          0 1px 0 rgba(255, 255, 255, 0.1);
+        opacity: 1;
+      }
+      .volume input[type="range"]:hover {
+        background: linear-gradient(90deg, #1db954, #3bd17f);
+        height: 5px;
+        transform: scaleY(1.1);
+      }
+
+      .volume input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: linear-gradient(135deg, #ffffff, #f0f0f0);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        transform: scale(1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        will-change: transform;
+      }
+
+      .volume input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 1);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .volume input[type="range"]::-webkit-slider-thumb:active {
+        transform: scale(1.05);
+        transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .volume label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .volume label:hover {
+        color: #1ed760;
+      }
+
+      .volume label svg {
+        width: 18px;
+        height: 18px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .volume.muted label {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .volume.muted label:hover {
+        color: rgba(29, 185, 84, 0.8);
+      }
+
+      .volume.muted input[type="range"] {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .volume.muted input[type="range"]::-webkit-slider-thumb {
+        background: rgba(29, 185, 84, 0.5);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        width: 100%;
+      }
+
+      p {
+        margin: 8px 0 0 0;
+        color: #ccc;
+        font-size: 13px;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: -0.1px;
+        transition: color 0.3s ease;
+        text-align: left;
+        width: 100%;
+      }
+
+      /* Subtle animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .container {
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Enhanced pulse effect for play button when playing */
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+            0 4px 15px rgba(29, 185, 84, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 12px rgba(29, 185, 84, 0.7);
+        }
+        50% {
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+            0 4px 15px rgba(29, 185, 84, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 24px rgba(29, 185, 84, 1);
+        }
+        100% {
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+            0 4px 15px rgba(29, 185, 84, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 0 12px rgba(29, 185, 84, 0.7);
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 5px rgba(29, 185, 84, 0.3));
+        }
+        50% {
+          filter: drop-shadow(0 0 15px rgba(29, 185, 84, 0.6));
+        }
+      }
+
+      .button.play-pause.playing {
+        animation: pulse 2.5s infinite ease-in-out,
+          glowPulse 2.5s infinite ease-in-out;
+      }
+
+      /* Ripple effect animation */
+      @keyframes ripple {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <button class="pin-button" id="pin-button" title="Pin/Unpin Player">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"
+          />
+        </svg>
+      </button>
+      <img id="album-cover" class="album-cover" src="" alt="Album Cover" />
+      <div class="song-info">
+        <h2 id="song-title">Connect to Spotify</h2>
+        <p id="song-artist">No music playing</p>
+        <div class="controls">
+          <button
+            class="button nav-button"
+            onclick="window.controlPlayback('previous')"
+            title="Previous Track"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+            </svg>
+          </button>
+          <button
+            class="button play-pause"
+            id="play-pause-btn"
+            title="Play/Pause"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+          <button
+            class="button nav-button"
+            onclick="window.controlPlayback('next')"
+            title="Next Track"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+            </svg>
+          </button>
+        </div>
         <div class="volume">
           <label>
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              <path
+                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+              />
             </svg>
-            <input id="volume-slider" type="range" min="0" max="100" value="50" oninput="adjustVolume(this.value)">
+            <input
+              id="volume-slider"
+              type="range"
+              min="0"
+              max="100"
+              value="50"
+              oninput="adjustVolume(this.value)"
+            />
           </label>
         </div>
       </div>
     </div>
-  </div>
-  <script src="renderer.js"></script>
-</body>
+    <script src="renderer.js"></script>
+  </body>
 </html>
