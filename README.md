@@ -72,7 +72,7 @@ Perfect for gaming, coding, design work, or any task where you need uninterrupte
 
 ## Quick Start
 
-### Option 1: Download Pre-built Release (Recommended)
+### Option 1: Download Pre-built Release (Recommended) **Coming Soon**
 
 1. Download the latest release from the [releases page](https://github.com/AlwaysRead/spotify-native-toggler/releases)
 2. Run the installer for your platform
