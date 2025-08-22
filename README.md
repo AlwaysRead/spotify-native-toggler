@@ -6,14 +6,14 @@
 
 **This application only works with Spotify Premium accounts.** The Spotify Web API restricts playback control to Premium subscribers only.
 
+</div>
+
 **Requirements:**
 
 - **Spotify Premium subscription** (required)
 - **Spotify app** installed and running on your device
 - **Your own Spotify Developer app** (free setup - instructions below)
 - **Node.js** (for building from source only)Spotify playback seamlessly with a beautiful Apple-style interface and customizable global shortcuts\*\*
-
-</div>
 
 ## Overview
 
