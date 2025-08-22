@@ -31,6 +31,15 @@ async function controlPlayback(action) {
     });
     console.log(`Spotify ${action} command executed.`);
   } catch (error) {
+    // Log detailed error information for debugging
+    console.log("Playback error details:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      errorMessage: error.response?.data?.error?.message,
+      errorReason: error.response?.data?.error?.reason,
+      fullError: error.response?.data,
+    });
+
     if (error.response?.status === 403) {
       const errorMessage = error.response.data?.error?.message || "";
       if (
@@ -42,6 +51,13 @@ async function controlPlayback(action) {
         );
         throw new Error(
           "Spotify Premium Required: Playback control is only available for Premium subscribers."
+        );
+      } else if (errorMessage.includes("Restriction violated")) {
+        console.error(
+          "❌ No Active Playback: Please start playing music on Spotify first."
+        );
+        throw new Error(
+          "No active playback session. Please open Spotify and start playing music to use playback controls."
         );
       } else {
         console.error("❌ Spotify API Access Forbidden:", errorMessage);
@@ -186,9 +202,30 @@ async function getCurrentVolume() {
   }
 }
 
+async function getCurrentPlaybackState() {
+  const accessToken = getAccessToken();
+  if (!accessToken) return null;
+
+  try {
+    const response = await axios.get("https://api.spotify.com/v1/me/player", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Playback state check error:", {
+      status: error.response?.status,
+      message: error.response?.data?.error?.message,
+    });
+    return null;
+  }
+}
+
 module.exports = {
   controlPlayback,
   getCurrentSong,
   setVolume,
   getCurrentVolume,
+  getCurrentPlaybackState,
 };

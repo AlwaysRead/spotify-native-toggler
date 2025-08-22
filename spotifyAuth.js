@@ -297,8 +297,11 @@ async function authenticate() {
         console.error("Status Text:", err.response?.statusText);
         console.error("Error Data:", err.response?.data);
         console.error("Request URL:", err.config?.url);
-        console.error("Request Data (partial):", err.config?.data?.substring(0, 200) + "...");
-        
+        console.error(
+          "Request Data (partial):",
+          err.config?.data?.substring(0, 200) + "..."
+        );
+
         // Send detailed error response
         res.send(`
           <!DOCTYPE html>
@@ -370,9 +373,13 @@ async function authenticate() {
               <h1>Authentication Failed</h1>
               <p>There was an error exchanging the authorization code for tokens.</p>
               <div class="error-details">
-                <strong>Error:</strong> ${err.response?.data?.error || 'Unknown error'}<br>
-                <strong>Description:</strong> ${err.response?.data?.error_description || err.message}<br>
-                <strong>Status:</strong> ${err.response?.status || 'Unknown'}
+                <strong>Error:</strong> ${
+                  err.response?.data?.error || "Unknown error"
+                }<br>
+                <strong>Description:</strong> ${
+                  err.response?.data?.error_description || err.message
+                }<br>
+                <strong>Status:</strong> ${err.response?.status || "Unknown"}
               </div>
               <p>Please check your Spotify app credentials and try again.</p>
               <button class="retry-btn" onclick="window.close()">Close</button>

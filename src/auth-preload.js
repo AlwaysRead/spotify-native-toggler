@@ -19,4 +19,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.removeAllListeners("auth-update");
     ipcRenderer.removeAllListeners("auth-success");
   },
+
+  // Settings APIs
+  getSettings: () => ipcRenderer.invoke("get-settings"),
+  saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
+  resetSettings: () => ipcRenderer.invoke("reset-settings"),
 });

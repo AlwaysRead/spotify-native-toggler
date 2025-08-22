@@ -341,7 +341,7 @@
         height: 4px;
         -webkit-appearance: none;
         appearance: none;
-        background: linear-gradient(90deg, #1db954, #3bd17f);
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 2px;
         outline: none;
         margin: 0;
@@ -352,8 +352,8 @@
           0 1px 0 rgba(255, 255, 255, 0.1);
         opacity: 1;
       }
+
       .volume input[type="range"]:hover {
-        background: linear-gradient(90deg, #1db954, #3bd17f);
         height: 5px;
         transform: scaleY(1.1);
       }
@@ -386,6 +386,15 @@
         transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
+      /* Ensure slider keeps its color when clicked/active */
+      .volume input[type="range"]:focus {
+        outline: none;
+      }
+
+      .volume input[type="range"]:active {
+        outline: none;
+      }
+
       .volume label {
         font-size: 14px;
         color: rgba(255, 255, 255, 0.9);
@@ -416,12 +425,8 @@
         color: rgba(29, 185, 84, 0.8);
       }
 
-      .volume.muted input[type="range"] {
-        background: rgba(255, 255, 255, 0.15);
-      }
-
       .volume.muted input[type="range"]::-webkit-slider-thumb {
-        background: rgba(29, 185, 84, 0.5);
+        background: rgba(255, 255, 255, 0.6);
       }
 
       h2 {
@@ -561,7 +566,7 @@
           </button>
         </div>
         <div class="volume">
-          <label>
+          <label id="volume-label">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path
                 d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"

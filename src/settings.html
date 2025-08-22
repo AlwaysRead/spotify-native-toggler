@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Native Toggler - Settings</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: #1a1a1a;
+        color: #e0e0e0;
+        min-height: 100vh;
+        padding: 16px;
+      }
+
+      .settings-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: #252525;
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 24px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1db954;
+      }
+
+      .section {
+        margin-bottom: 24px;
+      }
+
+      .section.shortcuts {
+        background: #2a2a2a;
+        border: 1px solid #1db954;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(29, 185, 84, 0.2);
+      }
+
+      .section.shortcuts h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #1db954;
+        border-bottom: 1px solid #1db954;
+        padding-bottom: 8px;
+      }
+
+      .shortcut-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #3a3a3a;
+      }
+
+      .shortcut-item:last-child {
+        border-bottom: none;
+      }
+
+      .shortcut-label {
+        font-weight: 400;
+        color: #e0e0e0;
+        flex: 1;
+      }
+
+      .shortcut-input {
+        background: #333333;
+        border: 1px solid #4a4a4a;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: #e0e0e0;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        width: 180px;
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      .shortcut-input:focus {
+        border-color: #1db954;
+      }
+
+      .shortcut-input.recording {
+        border-color: #ff4757;
+        animation: pulse 1.2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 0 2px rgba(255, 71, 87, 0.3);
+        }
+      }
+
+      .record-btn {
+        background: #1db954;
+        border: none;
+        border-radius: 6px;
+        color: #ffffff;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: background 0.2s ease;
+      }
+
+      .record-btn:hover {
+        background: #17a34a;
+      }
+
+      .record-btn.recording {
+        background: #ff4757;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 24px;
+      }
+
+      .btn {
+        background: #333333;
+        border: 1px solid #4a4a4a;
+        border-radius: 8px;
+        color: #e0e0e0;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .btn:hover {
+        background: #4a4a4a;
+      }
+
+      .btn.primary {
+        background: #1db954;
+        border-color: transparent;
+        font-weight: 700;
+      }
+
+      .btn.primary:hover {
+        background: #17a34a;
+      }
+
+      .btn.danger {
+        background: #ff4757;
+        border-color: transparent;
+        font-weight: 700;
+      }
+
+      .btn.danger:hover {
+        background: #e63e4d;
+      }
+
+      .status {
+        text-align: center;
+        margin-top: 12px;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .status.success {
+        background: rgba(29, 215, 96, 0.1);
+        border: 1px solid rgba(29, 215, 96, 0.2);
+        color: #1db954;
+        opacity: 1;
+      }
+
+      .status.error {
+        background: rgba(255, 71, 87, 0.1);
+        border: 1px solid rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+        opacity: 1;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #a0a0a0;
+        margin-top: 6px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="settings-container">
+      <h1>Settings</h1>
+
+      <div class="section shortcuts">
+        <h2>Global Shortcuts</h2>
+        <div class="help-text">
+          Click "Record" and press your desired key combination
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Toggle Window</span>
+          <div style="display: flex; align-items: center">
+            <input
+              type="text"
+              class="shortcut-input"
+              id="toggleWindow"
+              readonly
+            />
+            <button class="record-btn" onclick="recordShortcut('toggleWindow')">
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Play/Pause</span>
+          <div style="display: flex; align-items: center">
+            <input type="text" class="shortcut-input" id="playPause" readonly />
+            <button class="record-btn" onclick="recordShortcut('playPause')">
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Next Track</span>
+          <div style="display: flex; align-items: center">
+            <input type="text" class="shortcut-input" id="nextTrack" readonly />
+            <button class="record-btn" onclick="recordShortcut('nextTrack')">
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Previous Track</span>
+          <div style="display: flex; align-items: center">
+            <input
+              type="text"
+              class="shortcut-input"
+              id="previousTrack"
+              readonly
+            />
+            <button
+              class="record-btn"
+              onclick="recordShortcut('previousTrack')"
+            >
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Volume Up</span>
+          <div style="display: flex; align-items: center">
+            <input type="text" class="shortcut-input" id="volumeUp" readonly />
+            <button class="record-btn" onclick="recordShortcut('volumeUp')">
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Volume Down</span>
+          <div style="display: flex; align-items: center">
+            <input
+              type="text"
+              class="shortcut-input"
+              id="volumeDown"
+              readonly
+            />
+            <button class="record-btn" onclick="recordShortcut('volumeDown')">
+              Record
+            </button>
+          </div>
+        </div>
+
+        <div class="shortcut-item">
+          <span class="shortcut-label">Mute/Unmute</span>
+          <div style="display: flex; align-items: center">
+            <input type="text" class="shortcut-input" id="mute" readonly />
+            <button class="record-btn" onclick="recordShortcut('mute')">
+              Record
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn primary" onclick="saveSettings()">
+          Save Settings
+        </button>
+        <button class="btn danger" onclick="resetToDefaults()">
+          Reset to Defaults
+        </button>
+        <button class="btn" onclick="closeSettings()">Close</button>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <script src="settingsRenderer.js"></script>
+  </body>
+</html>

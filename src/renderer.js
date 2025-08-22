@@ -10,6 +10,7 @@ let lastVolumeUpdate = Date.now();
 let targetVolume = 50;
 let isUserAdjusting = false;
 let isPinned = false;
+let isManualMuteToggle = false;
 
 // Expose pin state to global window for main process access
 window.isPinned = isPinned;
@@ -25,6 +26,7 @@ function resetHideTimeout() {
       const container = document.querySelector(".container");
       if (container && !isPinned) {
         container.classList.add("hiding");
+        hideUIElements(); // Hide UI elements
         setTimeout(() => {
           if (!isHovering && !isPinned) {
             // Double check we're still not hovering and not pinned
@@ -33,6 +35,28 @@ function resetHideTimeout() {
         }, 300);
       }
     }, 3500);
+  }
+}
+
+function showUIElements() {
+  const pinButton = document.getElementById("pin-button");
+
+  if (pinButton) {
+    pinButton.style.opacity = "1";
+    pinButton.style.transform = "scale(1)";
+    pinButton.style.pointerEvents = "auto";
+  }
+}
+
+function hideUIElements() {
+  if (isPinned) return; // Don't hide if pinned
+
+  const pinButton = document.getElementById("pin-button");
+
+  if (pinButton) {
+    pinButton.style.opacity = "0";
+    pinButton.style.transform = "scale(0.8)";
+    pinButton.style.pointerEvents = "none";
   }
 }
 
@@ -84,15 +108,40 @@ function updatePlayPauseButton() {
   }
 }
 
-function togglePlayPause() {
-  if (isPlaying) {
-    window.controlPlayback("pause");
-    isPlaying = false;
-  } else {
-    window.controlPlayback("play");
-    isPlaying = true;
+async function togglePlayPause() {
+  const playPauseBtn = document.getElementById("play-pause-btn");
+
+  try {
+    // Add loading state
+    if (playPauseBtn) {
+      playPauseBtn.style.opacity = "0.6";
+      playPauseBtn.style.pointerEvents = "none";
+    }
+
+    if (isPlaying) {
+      const result = await window.controlPlayback("pause");
+      if (result !== false) {
+        // Only update UI if the API call was successful
+        isPlaying = false;
+        updatePlayPauseButton();
+      }
+    } else {
+      const result = await window.controlPlayback("play");
+      if (result !== false) {
+        // Only update UI if the API call was successful
+        isPlaying = true;
+        updatePlayPauseButton();
+      }
+    }
+  } catch (error) {
+    console.error("Error in togglePlayPause:", error);
+  } finally {
+    // Remove loading state
+    if (playPauseBtn) {
+      playPauseBtn.style.opacity = "1";
+      playPauseBtn.style.pointerEvents = "auto";
+    }
   }
-  updatePlayPauseButton();
   resetHideTimeout();
 }
 
@@ -123,19 +172,57 @@ function updateVolumeUI() {
   const volumeContainer = document.querySelector(".volume");
 
   if (volumeSlider) {
-    // Only update slider if it's not being adjusted by user
-    if (!isUserAdjusting) {
+    // Only update slider if user is not adjusting AND no pending volume updates
+    if (!isUserAdjusting && !isUpdatingVolume) {
       volumeSlider.value = currentVolume;
     }
+
+    // Update dynamic color fill based on current slider value
+    updateSliderFill(volumeSlider);
   }
 
   if (volumeContainer) {
-    if (currentVolume === 0) {
+    if (currentVolume === 0 || isMuted) {
       volumeContainer.classList.add("muted");
     } else {
       volumeContainer.classList.remove("muted");
     }
   }
+}
+
+function updateSliderFill(slider) {
+  if (!slider) return;
+
+  const value = slider.value;
+  const min = slider.min || 0;
+  const max = slider.max || 100;
+
+  // Calculate percentage
+  const percentage = ((value - min) / (max - min)) * 100;
+
+  // Check if muted for different colors
+  const volumeContainer = document.querySelector(".volume");
+  const isMutedState =
+    volumeContainer && volumeContainer.classList.contains("muted");
+
+  let gradient;
+  if (isMutedState || value == 0) {
+    // Muted state: gray fill up to knob position
+    gradient = `linear-gradient(90deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.4) ${percentage}%,
+      rgba(255, 255, 255, 0.15) ${percentage}%,
+      rgba(255, 255, 255, 0.15) 100%)`;
+  } else {
+    // Normal state: green fill up to knob position
+    gradient = `linear-gradient(90deg,
+      #1db954 0%,
+      #3bd17f ${percentage}%,
+      rgba(255, 255, 255, 0.2) ${percentage}%,
+      rgba(255, 255, 255, 0.2) 100%)`;
+  }
+
+  slider.style.background = gradient;
 }
 
 async function adjustVolume(volume) {
@@ -150,44 +237,126 @@ async function adjustVolume(volume) {
     clearTimeout(volumeUpdateTimeout);
   }
 
-  // Update UI immediately for responsiveness
+  // Store the target volume
   targetVolume = newVolume;
-  currentVolume = newVolume;
-  updateVolumeUI();
 
   // Debounce the actual volume update
   volumeUpdateTimeout = setTimeout(async () => {
     isUpdatingVolume = true;
+    const volumeContainer = document.querySelector(".volume");
+    const volumeLabel = document.getElementById("volume-label");
+
     try {
+      // Add subtle loading state to label only, not the entire container
+      if (volumeLabel) {
+        volumeLabel.style.opacity = "0.6";
+      }
+
       const result = await window.electronAPI.setVolume(newVolume);
       if (result !== null) {
+        // Update the actual volume after successful API response
         currentVolume = result;
         targetVolume = result;
-        if (currentVolume > 0) {
-          previousVolume = currentVolume;
-          isMuted = false;
-        } else {
-          isMuted = true;
+
+        // Don't auto-update mute state if this is part of a manual mute toggle
+        if (!isManualMuteToggle) {
+          if (currentVolume > 0) {
+            previousVolume = currentVolume;
+            isMuted = false;
+          } else {
+            isMuted = true;
+          }
         }
-        updateVolumeUI();
+
+        // Only update mute state visual, slider position will be preserved
+        const volumeContainer = document.querySelector(".volume");
+        if (volumeContainer) {
+          if (currentVolume === 0 || isMuted) {
+            volumeContainer.classList.add("muted");
+          } else {
+            volumeContainer.classList.remove("muted");
+          }
+        }
+
         lastVolumeUpdate = Date.now();
       }
+    } catch (error) {
+      console.error("Error setting volume:", error);
+      // Revert slider to previous volume on error only if user is not adjusting
+      const volumeSlider = document.getElementById("volume-slider");
+      if (volumeSlider && !isUserAdjusting) {
+        volumeSlider.value = currentVolume;
+      }
+      targetVolume = currentVolume;
     } finally {
       isUpdatingVolume = false;
-    }
-  }, 100); // Wait 100ms before actually setting the volume
 
-  resetHideTimeout();
+      // Remove loading state from label only
+      if (volumeLabel) {
+        volumeLabel.style.opacity = "1";
+      }
+    }
+  }, 100); // Wait 100ms before actually setting the volume  resetHideTimeout();
 }
 
 async function toggleMute() {
-  if (isMuted) {
-    // Unmute
-    await adjustVolume(previousVolume);
-  } else {
-    // Mute
-    previousVolume = currentVolume;
-    await adjustVolume(0);
+  console.log("toggleMute called - current state:", {
+    isMuted,
+    currentVolume,
+    previousVolume,
+  });
+
+  const volumeLabel = document.getElementById("volume-label");
+
+  try {
+    isManualMuteToggle = true; // Set flag to prevent automatic mute state changes
+
+    // Add loading state
+    if (volumeLabel) {
+      volumeLabel.style.opacity = "0.6";
+      volumeLabel.style.pointerEvents = "none";
+    }
+
+    if (isMuted) {
+      // Unmute
+      console.log("Unmuting - restoring volume to:", previousVolume);
+      const result = await window.electronAPI.setVolume(previousVolume);
+      if (result !== null) {
+        currentVolume = result;
+        targetVolume = result;
+        isMuted = false;
+        updateVolumeUI();
+      }
+    } else {
+      // Mute
+      console.log("Muting - saving current volume:", currentVolume);
+      if (currentVolume > 0) {
+        previousVolume = currentVolume;
+      }
+      const result = await window.electronAPI.setVolume(0);
+      if (result !== null) {
+        currentVolume = 0;
+        targetVolume = 0;
+        isMuted = true;
+        updateVolumeUI();
+      }
+    }
+
+    console.log("After toggle - new state:", {
+      isMuted,
+      currentVolume,
+      previousVolume,
+    });
+  } catch (error) {
+    console.error("Error in toggleMute:", error);
+  } finally {
+    isManualMuteToggle = false; // Reset flag
+
+    // Remove loading state
+    if (volumeLabel) {
+      volumeLabel.style.opacity = "1";
+      volumeLabel.style.pointerEvents = "auto";
+    }
   }
 
   resetHideTimeout();
@@ -248,6 +417,8 @@ document.addEventListener("DOMContentLoaded", () => {
     volumeSlider.value = currentVolume;
     volumeSlider.style.opacity = "1";
     volumeSlider.style.visibility = "visible";
+    // Initialize the dynamic color fill
+    updateSliderFill(volumeSlider);
   }
 
   // Add event listeners for controls
@@ -257,6 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (controls) {
     controls.addEventListener("mouseenter", () => {
       isHovering = true;
+      showUIElements();
       if (hideTimeout) {
         clearTimeout(hideTimeout);
       }
@@ -266,6 +438,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     controls.addEventListener("mouseleave", () => {
+      isHovering = false;
+      resetHideTimeout();
+    });
+  }
+
+  // Show UI elements when hovering
+  if (container) {
+    container.addEventListener("mouseenter", () => {
+      isHovering = true;
+      showUIElements();
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+      }
+      container.classList.remove("hiding");
+    });
+
+    container.addEventListener("mouseleave", () => {
       isHovering = false;
       resetHideTimeout();
     });
@@ -292,6 +481,22 @@ document.addEventListener("DOMContentLoaded", () => {
         isUserAdjusting = false;
         volumeContainer.style.transform = "scale(1)";
         adjustVolume(volumeSlider.value);
+      }
+    });
+
+    // Add real-time input event for smooth dragging experience
+    volumeSlider.addEventListener("input", () => {
+      // Update color fill in real-time as user drags
+      updateSliderFill(volumeSlider);
+
+      if (isUserAdjusting) {
+        // Update visual mute state immediately while dragging
+        const volume = parseInt(volumeSlider.value);
+        if (volume === 0) {
+          volumeContainer.classList.add("muted");
+        } else {
+          volumeContainer.classList.remove("muted");
+        }
       }
     });
 
@@ -353,8 +558,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add mute toggle functionality
   const volumeLabel = document.querySelector(".volume label");
+  console.log("Volume label found:", volumeLabel);
   if (volumeLabel) {
-    volumeLabel.addEventListener("click", toggleMute);
+    volumeLabel.addEventListener("click", (e) => {
+      console.log("Volume icon clicked - toggling mute");
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMute();
+    });
+
+    // Make sure the label is clearly clickable
+    volumeLabel.style.cursor = "pointer";
+    volumeLabel.title = "Click to mute/unmute";
+  } else {
+    console.error("Volume label not found!");
   }
 
   // Add pin button functionality
@@ -380,20 +597,157 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   } else {
     console.error("Pin button not found!");
-  } // Start the hide timeout
+  }
+
+  // Start the hide timeout
   resetHideTimeout();
 });
 
-// Update song details and volume every second
+// Listen for mute state changes from global shortcuts
+console.log("Renderer.js loaded - Setting up mute state change listener");
+window.electronAPI.onMuteStateChanged((event, data) => {
+  console.log("Renderer: Received mute state change:", data);
+  const { volume, isMuted } = data;
+
+  // Update the local mute state and UI
+  currentVolume = isMuted ? 0 : volume;
+  updateMuteButton();
+
+  // Update volume slider to reflect mute state
+  const volumeSlider = document.getElementById("volume-slider");
+  if (volumeSlider) {
+    console.log("Updating volume slider:", {
+      isMuted,
+      volume,
+      newValue: isMuted ? 0 : volume,
+    });
+    volumeSlider.value = isMuted ? 0 : volume;
+    updateSliderFill(volumeSlider);
+  }
+});
+
+// Update song details and volume every second, but avoid interfering with user interactions
 setInterval(async () => {
   await updateSongDetails();
-  await getCurrentVolume();
+  // Only fetch volume if user is not currently interacting with controls
+  if (!isUserAdjusting && !isUpdatingVolume) {
+    await getCurrentVolume();
+  }
 }, 1000);
 
-window.controlPlayback = (action) => {
-  window.electronAPI.controlPlayback(action);
-  resetHideTimeout();
+window.controlPlayback = async (action) => {
+  try {
+    const result = await window.electronAPI.controlPlayback(action);
+    resetHideTimeout();
+    return result;
+  } catch (error) {
+    console.error(
+      `Playback control error for action '${action}':`,
+      error.message
+    );
+
+    // Show user-friendly notification
+    if (error.message.includes("Premium")) {
+      showNotification("Spotify Premium Required", "error");
+    } else if (error.message.includes("device")) {
+      showNotification(
+        "No Spotify device found. Open Spotify first.",
+        "warning"
+      );
+    } else if (error.message.includes("Restriction violated")) {
+      showNotification(
+        "Spotify playback restricted. Try starting music first.",
+        "warning"
+      );
+    } else {
+      showNotification("Spotify operation failed", "error");
+    }
+
+    return false;
+  }
 };
+
+// Simple notification system
+function showNotification(message, type = "info") {
+  // Remove any existing notification
+  const existingNotification = document.querySelector(".notification");
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  // Create notification element
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+
+  // Style the notification
+  Object.assign(notification.style, {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    background:
+      type === "error"
+        ? "rgba(220, 38, 38, 0.9)"
+        : type === "warning"
+        ? "rgba(245, 158, 11, 0.9)"
+        : "rgba(59, 130, 246, 0.9)",
+    color: "white",
+    padding: "12px 16px",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    zIndex: "10000",
+    maxWidth: "300px",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    animation: "slideInFromRight 0.3s ease-out",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+  });
+
+  // Add animation styles if not already present
+  if (!document.querySelector("#notification-styles")) {
+    const style = document.createElement("style");
+    style.id = "notification-styles";
+    style.textContent = `
+      @keyframes slideInFromRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOutToRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Add to document
+  document.body.appendChild(notification);
+
+  // Auto-remove after 4 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.style.animation = "slideOutToRight 0.3s ease-in";
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 300);
+    }
+  }, 4000);
+}
 
 // Placeholder implementations for missing functions
 async function getCurrentSong() {

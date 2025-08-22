@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
 const { hasCredentials, saveCredentials } = require("./credentialsManager");
+const SettingsManager = require("./settingsManager");
 
 // Suppress cache warnings
 app.commandLine.appendSwitch("--disable-gpu-sandbox");
@@ -18,6 +19,8 @@ const { registerGlobalShortcuts } = require("../globalShortcuts");
 let mainWindow = null;
 let authWindow = null;
 let setupWindow = null;
+let settingsWindow = null;
+let settingsManager = new SettingsManager();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -28,7 +31,7 @@ function createWindow() {
     minHeight: 200,
     maxHeight: 200,
     resizable: false,
-    show: false,
+    show: true, // Changed to true to ensure renderer loads
     transparent: true,
     frame: false,
     backgroundColor: "#00000000",
@@ -149,6 +152,7 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.handle("control-playback", async (event, action) => {
+  console.log("IPC handler: control-playback called with action:", action);
   await controlPlayback(action);
 });
 
@@ -177,6 +181,8 @@ ipcMain.handle("authenticate-spotify", async () => {
     await authenticate();
     console.log("Authentication successful!");
 
+    // Don't create main window here - wait for auth window to close after delay
+
     // Give a small delay to ensure everything is ready
     setTimeout(() => {
       if (authWindow && !authWindow.isDestroyed()) {
@@ -196,7 +202,7 @@ ipcMain.handle("close-auth-window", () => {
     authWindow.close();
     // Create main window after successful authentication
     createWindow();
-    registerGlobalShortcuts(toggleWindow);
+    registerGlobalShortcuts(toggleWindow, settingsManager, mainWindow);
   }
 });
 
@@ -229,3 +235,89 @@ ipcMain.handle("setup-complete", () => {
     createAuthWindow();
   }
 });
+
+// Settings IPC handlers
+ipcMain.handle("get-settings", () => {
+  return settingsManager.getSettings();
+});
+
+ipcMain.handle("save-settings", (event, settings) => {
+  try {
+    // Update shortcuts
+    if (settings.shortcuts) {
+      Object.keys(settings.shortcuts).forEach((key) => {
+        settingsManager.updateShortcut(key, settings.shortcuts[key]);
+      });
+    }
+
+    // Re-register global shortcuts with new settings
+    const { globalShortcut } = require("electron");
+    globalShortcut.unregisterAll();
+    registerGlobalShortcuts(toggleWindow, settingsManager, mainWindow);
+
+    return true;
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("reset-settings", () => {
+  try {
+    settingsManager.resetToDefaults();
+
+    // Re-register global shortcuts with default settings
+    const { globalShortcut } = require("electron");
+    globalShortcut.unregisterAll();
+    registerGlobalShortcuts(toggleWindow, settingsManager, mainWindow);
+
+    return true;
+  } catch (error) {
+    console.error("Error resetting settings:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("close-settings", () => {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.close();
+  }
+});
+
+ipcMain.handle("open-settings", () => {
+  createSettingsWindow();
+});
+
+function createSettingsWindow() {
+  if (settingsWindow && !settingsWindow.isDestroyed()) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 700,
+    height: 600,
+    resizable: false,
+    show: false,
+    transparent: false,
+    frame: true,
+    title: "Spotify Native Toggler - Settings",
+    webPreferences: {
+      preload: path.join(__dirname, "settingsPreload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+    parent: mainWindow,
+    modal: false,
+  });
+
+  settingsWindow.loadFile(path.join(__dirname, "settings.html"));
+
+  settingsWindow.once("ready-to-show", () => {
+    settingsWindow.show();
+  });
+
+  settingsWindow.on("closed", () => {
+    settingsWindow = null;
+  });
+}
